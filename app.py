@@ -6,19 +6,24 @@ import createFontImage
 app = Flask(__name__)
 @app.route('/tutorial-image-links', methods=['POST'])
 def get_links_for_unity():
+    print("Request received")
     try:
         request_data = request.get_json()
+        if not request_data:
+            return jsonify({"error": "Invalid JSON data"}), 400
     # Extract tutorial-id and type from the request
         tutorial_id = request_data.get('tutorial-id')
-        tutorial_type = request_data.get('type')
+        if not tutorial_id:
+            return jsonify({"error": "Missing 'tutorial-id' in request body"}), 400
+        
 
-    # Load the data
-        if(tutorial_type == 'beginner'):
-            with open('steps_data.json', 'r') as file:
+        if tutorial_id[0].isdigit():
+           with open('steps_data.json', 'r') as file:
                 data = json.load(file)
         else:
             with open('advanced_steps_data.json', 'r') as file:
                 data = json.load(file)
+            
 
     # Search for the tutorial-id and type in the data
         for tutorial in data:
@@ -42,10 +47,11 @@ def generate_image():
         if not data:
             return jsonify({"error": "Invalid JSON data"}), 400
         
-        if not data or 'font_id' not in data:
+        if not data or 'font-id' not in data:
             return jsonify({"error": "Missing 'font_id' in request body"}), 400
         
-        font_id = data['font_id']
+        # Extract the font_id from the request
+        font_id, text, text_color = data['font-id'].split('-||-')
 
         # Define the base fonts directory
         fonts_directory = "fonts"
@@ -64,10 +70,6 @@ def generate_image():
 
         # Use the first .ttf file found
         font_path = os.path.join(font_folder_path, ttf_files[0])
-
-        # Get the text and text color from the request data
-        text = data.get('text', '')
-        text_color = data.get('text_color', '#000000')
         
         # Convert hex color to RGB tuple
         text_color = tuple(int(text_color[i:i+2], 16) for i in (1, 3, 5))
@@ -91,5 +93,5 @@ def generate_image():
 
 if __name__ == '__main__':
      port = int(os.environ.get("PORT", 5000))
-     app.run(debug=True, host='0.0.0.0', port=port)
+     app.run(debug=True, host='127.0.0.1', port=port)
 
