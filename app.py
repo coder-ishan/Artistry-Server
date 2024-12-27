@@ -1,9 +1,38 @@
-from flask import Flask, request, send_file, jsonify
+from flask import Flask, json, request, send_file, jsonify
 from io import BytesIO
 import os
 import createFontImage
 
 app = Flask(__name__)
+@app.route('/tutorial-image-links', methods=['POST'])
+def get_links_for_unity():
+    try:
+        request_data = request.get_json()
+    
+    # Extract tutorial-id and type from the request
+        tutorial_id = request_data.get('tutorial-id')
+        tutorial_type = request_data.get('type')
+
+    # Load the data
+        if(tutorial_type == 'beginner'):
+            with open('steps_data.json', 'r') as file:
+                data = json.load(file)
+        else:
+            with open('advanced_steps_data.json', 'r') as file:
+                data = json.load(file)
+
+    # Search for the tutorial-id and type in the data
+        for tutorial in data:
+            if tutorial['tutorial-id'] == tutorial_id:
+                    return jsonify({
+                        "steps": len(tutorial['tutorial'])-1,
+                        "images": tutorial['tutorial']
+                    })
+        
+        return jsonify({'error': 'Tutorial not found'}), 404
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/generate-font-image', methods=['POST'])
 def generate_image():
