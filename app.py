@@ -8,7 +8,6 @@ app = Flask(__name__)
 def get_links_for_unity():
     try:
         request_data = request.get_json()
-    
     # Extract tutorial-id and type from the request
         tutorial_id = request_data.get('tutorial-id')
         tutorial_type = request_data.get('type')
@@ -34,12 +33,15 @@ def get_links_for_unity():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/generate-font-image', methods=['POST'])
+
+@app.route('/font-image', methods=['POST'])
 def generate_image():
     try:
         # Get the JSON data from the request
         data = request.get_json()
-
+        if not data:
+            return jsonify({"error": "Invalid JSON data"}), 400
+        
         if not data or 'font_id' not in data:
             return jsonify({"error": "Missing 'font_id' in request body"}), 400
         
@@ -90,3 +92,4 @@ def generate_image():
 if __name__ == '__main__':
      port = int(os.environ.get("PORT", 5000))
      app.run(debug=True, host='0.0.0.0', port=port)
+
