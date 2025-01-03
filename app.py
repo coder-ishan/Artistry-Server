@@ -47,11 +47,13 @@ def generate_image():
         if not data:
             return jsonify({"error": "Invalid JSON data"}), 400
         
-        if not data or 'font-id' not in data:
+        if not data or 'font_id' not in data:
             return jsonify({"error": "Missing 'font_id' in request body"}), 400
         
         # Extract the font_id from the request
-        font_id, text, text_color = data['font-id'].split('-||-')
+        font_id= data['font_id']
+        text = data.get('text', 'Hello, World!')
+        text_color = data.get('text_color', '#000000')
 
         # Define the base fonts directory
         fonts_directory = "fonts"
@@ -93,5 +95,5 @@ def generate_image():
 
 if __name__ == '__main__':
      port = int(os.environ.get("PORT", 5000))
-     app.run(debug=True, host='0.0.0.0', port=port)
+     app.run(debug=True)
 
